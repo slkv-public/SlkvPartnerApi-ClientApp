@@ -1,0 +1,18 @@
+﻿@model SwissLife.Slkv.Partner.ClientAppSample.Models.InsuredPersonsModel
+
+@{
+    ViewData["Title"] = "InsuredPersons";
+}
+
+<h2>InsuredPersons</h2>
+
+<div>
+    <h4>InsuredPersons</h4>
+    <hr />
+   <ul>
+       @foreach (var item in Model.InsuredPersons)
+       {
+           <li>@item.FirstName @item.LastName</li>
+       }
+   </ul>
+</div>

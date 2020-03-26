@@ -1,0 +1,34 @@
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="jumbotron">
+    <h1 class="display-4">SLKV Partner API</h1>
+    <p class="lead">This is a simple example of a client application for demonstrate the authentication against the Swiss Life SLKV Partner API.</p>
+
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <h2>Authentication</h2>
+        <ul>
+            <li>If you see this, you've been able to authenticate successfully against Swiss Life authentication server.</li>
+            <li>@Html.ActionLink("Get contracts", "Contracts", "Request")</li>
+            <li>@Html.ActionLink("Get insured persons", "InsuredPersons", "Request")</li>
+        </ul>
+    </div>
+    <div class="col-md-4">
+        <h2>Swiss Life links</h2>
+        <ul>
+            <li><a href="https://www.swisslife.ch">Swiss Life </a></li>
+            <li><a href="https://mylife.swisslife.ch/">MyLife - Unternehmenskundenportal</a></li>
+        </ul>
+    </div>
+    <div class="col-md-4">
+        <h2>Further links</h2>
+        <ul>
+            <li><a href="https://oauth.net/2/">OAuth2</a></li>
+            <li><a href="https://jwt.io/">JSON Web Tokens</a></li>
+        </ul>
+    </div>
+</div>

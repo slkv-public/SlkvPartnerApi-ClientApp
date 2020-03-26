@@ -1,0 +1,18 @@
+﻿@model SwissLife.Slkv.Partner.ClientAppSample.Models.ContractsModel
+
+@{
+    ViewData["Title"] = "Contracts";
+}
+
+<h2>Contracts</h2>
+
+<div>
+    <h4>Contracts</h4>
+    <hr />
+    <ul>
+        @foreach (var contract in Model.Contracts)
+        {
+        <li>@contract.ContractNumber - @contract.CompanyName</li>
+        }
+    </ul>
+</div>
