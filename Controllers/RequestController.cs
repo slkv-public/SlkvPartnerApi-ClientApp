@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
@@ -41,6 +42,17 @@ namespace SwissLife.Slkv.Partner.ClientAppSample.Controllers
             HttpResponseMessage response = await httpClient.GetAsync($"https://{configuration["SlkvPartnerApi:Endpoint"]}/contract/{contractId}/insured-person");
             string json = await response.Content.ReadAsStringAsync();
             InsuredPersonsModel model = JsonConvert.DeserializeObject<InsuredPersonsModel>(json);
+            return View(model);
+        }
+
+        public async Task<IActionResult> Documents(string contractId = "B01482DD9BED4927BEB5BB54EFD6D6E2")
+        {
+            string accessToken = await HttpContext.GetTokenAsync("access_token");
+            HttpClient httpClient = httpClientFactory.CreateClient();
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            HttpResponseMessage response = await httpClient.GetAsync($"https://{configuration["SlkvPartnerApi:Endpoint"]}/document?contractId={contractId}");
+            string json = await response.Content.ReadAsStringAsync();
+            DocumentsModel model = JsonConvert.DeserializeObject<DocumentsModel>(json);
             return View(model);
         }
     }
