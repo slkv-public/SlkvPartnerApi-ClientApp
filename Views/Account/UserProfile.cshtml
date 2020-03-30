@@ -1,3 +1,4 @@
+@using Microsoft.AspNetCore.Authentication
 @{
     ViewData["Title"] = "User Profile";
 
@@ -32,7 +33,15 @@
 
                     rowNo++;
                 }
-            </tbody>
-        </table>
-    </div>
+
+                <tr>
+                    <th>@rowNo</th>
+                    <td>Access token</td>
+                    <td>
+                        <textarea style="width:100%;">@Context.GetTokenAsync("access_token").Result</textarea>
+                    </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
 </div>
