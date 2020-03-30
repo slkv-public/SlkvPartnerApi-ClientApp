@@ -9,10 +9,22 @@
 <div>
     <h4>Contracts</h4>
     <hr />
-    <ul>
-        @foreach (var contract in Model.Contracts)
-        {
-        <li>@contract.ContractNumber - @contract.CompanyName</li>
-        }
-    </ul>
+    @if (Model.Contracts?.Any() == true)
+    {
+        <ul>
+            @foreach (var contract in Model.Contracts)
+            {
+            <li>
+                @contract.ContractNumber - @contract.CompanyName
+                <ul>
+                    <li>@Html.ActionLink("Insured persons", "InsuredPersons", "Requests", new { contractId = contract.ContractId })</li>
+                </ul>
+            </li>
+            }
+        </ul>
+    }
+    else
+    {
+    <p>No contracts assigned to user. Probably you are not a admin- or super-user.</p>
+    }
 </div>

@@ -12,7 +12,7 @@
    <ul>
        @foreach (var item in Model.Documents)
        {
-           <li>@item.DocumentName</li>
+           <li>@Html.ActionLink(item.DocumentName, "DownloadDocument", "Request", new { documentId = item.DocumentId }, new { target = "_clear" } )</li>
        }
    </ul>
 </div>

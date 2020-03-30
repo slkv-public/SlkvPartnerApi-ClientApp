@@ -16,9 +16,10 @@ namespace SwissLife.Slkv.Partner.ClientAppSample.Controllers
             this.configuration = configuration;
         }
 
-        public async Task Login(string returnUrl = "/")
+        [Authorize]
+        public IActionResult Login()
         {
-            await HttpContext.ChallengeAsync("Auth0", new AuthenticationProperties { RedirectUri = returnUrl });
+            return RedirectToAction("Index", "Home");
         }
 
         [Authorize]
