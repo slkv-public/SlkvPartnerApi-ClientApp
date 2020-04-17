@@ -33,5 +33,7 @@ namespace SwissLife.Slkv.Partner.ClientAppSample.Models
         public bool? IsCrossBorderCommuter { get; set; }
 
         public DateTime? DateOfMarriage { get; set; }
+
+        public string ContractId { get; set; }
     }
 }

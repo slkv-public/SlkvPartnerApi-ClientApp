@@ -12,7 +12,7 @@
    <ul>
        @foreach (var item in Model.InsuredPersons)
        {
-           <li>@item.FirstName @item.LastName</li>
+           <li>@item.FirstName @item.LastName (@Html.ActionLink("change salary", "ChangeSalaryForm", "Request", item))</li>
        }
    </ul>
 </div>

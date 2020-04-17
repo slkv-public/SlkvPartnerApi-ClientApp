@@ -56,7 +56,7 @@ namespace SwissLife.Slkv.Partner.ClientAppSample
                     // options.Scope.Add("slkv_process_changepensionplan");
                     // options.Scope.Add("slkv_process_changepersonaddress");
                     // options.Scope.Add("slkv_process_changepersondata");
-                    // options.Scope.Add("slkv_process_changesalary");
+                    options.Scope.Add("slkv_process_changesalary");
                     // options.Scope.Add("slkv_process_entry");
                     // options.Scope.Add("slkv_process_leaving");
                     // options.Scope.Add("slkv_process_contractconnect");

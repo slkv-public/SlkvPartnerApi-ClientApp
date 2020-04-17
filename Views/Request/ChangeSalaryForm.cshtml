@@ -1,0 +1,33 @@
+﻿@model SwissLife.Slkv.Partner.ClientAppSample.Models.InsuredPersonModel
+
+@{
+    ViewData["Title"] = $"{Model.FirstName} {Model.LastName}";
+}
+
+<h2>ChangeSalary</h2>
+
+<div>
+    <h4>@Model.FirstName @Model.LastName</h4>
+    <hr />
+    @using (Html.BeginForm("ChangeSalary", "Request", Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http.HttpMethod.Post))
+    {
+        @Html.HiddenFor(model => model.ContractId)
+        @Html.HiddenFor(model => model.InsuredPersonId)
+        <dl class="dl-horizontal">
+            <dt>
+                @Html.DisplayNameFor(model => model.EmploymentRate)
+            </dt>
+            <dd>
+                @Html.EditorFor(model => model.EmploymentRate)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.AnnualSalary)
+            </dt>
+            <dd>
+                @Html.EditorFor(model => model.AnnualSalary)
+            </dd>
+        </dl>
+        <hr />
+        <button type="submit">Send request</button>
+    }
+</div>
