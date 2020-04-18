@@ -55,6 +55,23 @@ namespace SwissLife.Slkv.Partner.ClientAppSample.Controllers
         public async Task<IActionResult> ChangeSalary(InsuredPersonModel insuredPersonModel)
         {
             HttpResponseMessage response = await SendApiRequestAsync(
+                $"/contract/{insuredPersonModel.ContractId}/insured-person/{insuredPersonModel.InsuredPersonId}/salary/validation",
+                HttpMethod.Post,
+                new
+                {
+                    effectiveAnnualSalary = insuredPersonModel.AnnualSalary,
+                    employmentRate = insuredPersonModel.EmploymentRate,
+                    dueDate = DateTime.Now,
+                });
+
+            string validationResponseContent = await response.Content.ReadAsStringAsync();
+            ValidationResultModel validationResultModel = JsonConvert.DeserializeObject<ValidationResultModel>(validationResponseContent);
+            if (!validationResultModel.IsValid)
+            {
+                return View("ChangeSalaryForm", insuredPersonModel);
+            }
+
+            response = await SendApiRequestAsync(
                 $"/contract/{insuredPersonModel.ContractId}/insured-person/{insuredPersonModel.InsuredPersonId}/salary",
                 HttpMethod.Post,
                 new
