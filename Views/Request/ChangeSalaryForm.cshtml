@@ -19,12 +19,14 @@
             </dt>
             <dd>
                 @Html.EditorFor(model => model.EmploymentRate)
+                @Html.ValidationMessageFor(model => model.EmploymentRate)
             </dd>
             <dt>
                 @Html.DisplayNameFor(model => model.AnnualSalary)
             </dt>
             <dd>
                 @Html.EditorFor(model => model.AnnualSalary)
+                @Html.ValidationMessageFor(model => model.AnnualSalary)
             </dd>
         </dl>
         <hr />

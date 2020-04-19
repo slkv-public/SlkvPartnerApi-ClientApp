@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -15,6 +18,7 @@ namespace SwissLife.Slkv.Partner.ClientAppSample.Controllers
     [Authorize]
     public class RequestController : Controller
     {
+        private const string SampleContractId = "B01482DD9BED4927BEB5BB54EFD6D6E2";
         private readonly IHttpClientFactory httpClientFactory;
         private readonly IConfiguration configuration;
 
@@ -26,33 +30,119 @@ namespace SwissLife.Slkv.Partner.ClientAppSample.Controllers
             this.configuration = configuration;
         }
 
-        public Task<IActionResult> Contracts()
+        public async Task<IActionResult> Contracts(
+            CancellationToken cancellationToken = default)
         {
-            return RequestApiJsonAsync<ContractsModel>("/contract"); ;
+            HttpResponseMessage response = await SendApiRequestAsync(
+                "/contract", 
+                HttpMethod.Get,
+                cancellationToken: cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                return StatusCode((int)response.StatusCode);
+            }
+
+            string json = await response.Content.ReadAsStringAsync();
+            ContractsModel model = JsonConvert.DeserializeObject<ContractsModel>(json);
+            return View(model);
         }
 
-        public Task<IActionResult> InsuredPersons(string contractId = "B01482DD9BED4927BEB5BB54EFD6D6E2")
+        public async Task<IActionResult> InsuredPersons(
+            string contractId = SampleContractId,
+            CancellationToken cancellationToken = default)
         {
-            return RequestApiAsync(
-                $"/contract/{contractId}/insured-person",
-                async response => {
-                    string json = await response.Content.ReadAsStringAsync();
-                    InsuredPersonsModel model = JsonConvert.DeserializeObject<InsuredPersonsModel>(json);
-                    foreach (InsuredPersonModel insuredPerson in model.InsuredPersons)
-                    {
-                        insuredPerson.ContractId = contractId;
-                    }
+            HttpResponseMessage response = await SendApiRequestAsync(
+                $"/contract/{contractId}/insured-person", 
+                HttpMethod.Get,
+                cancellationToken: cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                return StatusCode((int)response.StatusCode);
+            }
 
-                    return View(model);
-                });
+            string json = await response.Content.ReadAsStringAsync();
+            InsuredPersonsModel model = JsonConvert.DeserializeObject<InsuredPersonsModel>(json);
+            foreach (InsuredPersonModel insuredPerson in model.InsuredPersons)
+            {
+                insuredPerson.ContractId = contractId;
+            }
+
+            return View(model);
         }
 
-        public IActionResult ChangeSalaryForm(InsuredPersonModel insuredPersonModel)
+        public IActionResult ChangeSalaryForm(
+            InsuredPersonModel insuredPersonModel)
         {
             return View(insuredPersonModel);
         }
 
-        public async Task<IActionResult> ChangeSalary(InsuredPersonModel insuredPersonModel)
+        public async Task<IActionResult> ChangeSalary(
+            InsuredPersonModel insuredPersonModel,
+            CancellationToken cancellationToken = default)
+        {
+            // we could execute a validation before sending the request.
+            if (!await ValidateChangeSalary(insuredPersonModel))
+            {
+                return View("ChangeSalaryForm", insuredPersonModel);
+            }
+
+            // okay, now we send the request to start the business process.
+            HttpResponseMessage response = await SendApiRequestAsync(
+                $"/contract/{insuredPersonModel.ContractId}/insured-person/{insuredPersonModel.InsuredPersonId}/salary",
+                HttpMethod.Post,
+                new
+                {
+                    effectiveAnnualSalary = insuredPersonModel.AnnualSalary,
+                    employmentRate = insuredPersonModel.EmploymentRate,
+                    dueDate = DateTime.Now,
+                },
+                cancellationToken: cancellationToken);
+            if (response.IsSuccessStatusCode)
+            {
+                return View();
+            }
+
+            return StatusCode((int)response.StatusCode);
+        }
+
+        public async Task<IActionResult> Documents(
+            string refCorrelationId = "3921DDC2-3587-4B65-91F0-D30278C8FB5A",
+            CancellationToken cancellationToken = default)
+        {
+            HttpResponseMessage response = await SendApiRequestAsync(
+                $"/document?refCorrelationId={refCorrelationId}", 
+                HttpMethod.Get,
+                cancellationToken: cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                return StatusCode((int)response.StatusCode);
+            }
+
+            string json = await response.Content.ReadAsStringAsync();
+            DocumentsModel model = JsonConvert.DeserializeObject<DocumentsModel>(json);
+            return View(model);
+        }
+
+        public async Task<IActionResult> DownloadDocument(
+            string documentId,
+            CancellationToken cancellationToken = default)
+        {
+            HttpResponseMessage response = await SendApiRequestAsync(
+                $"/document/{documentId}/content", 
+                HttpMethod.Get,
+                cancellationToken: cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                return StatusCode((int)response.StatusCode);
+            }
+
+            byte[] content = await response.Content.ReadAsByteArrayAsync();
+            return File(content, response.Content.Headers.ContentType.ToString(), response.Content.Headers.ContentDisposition.FileName);
+        }
+
+        private async Task<bool> ValidateChangeSalary(
+            InsuredPersonModel insuredPersonModel,
+            CancellationToken cancellationToken = default)
         {
             HttpResponseMessage response = await SendApiRequestAsync(
                 $"/contract/{insuredPersonModel.ContractId}/insured-person/{insuredPersonModel.InsuredPersonId}/salary/validation",
@@ -62,73 +152,29 @@ namespace SwissLife.Slkv.Partner.ClientAppSample.Controllers
                     effectiveAnnualSalary = insuredPersonModel.AnnualSalary,
                     employmentRate = insuredPersonModel.EmploymentRate,
                     dueDate = DateTime.Now,
-                });
+                },
+                cancellationToken: cancellationToken);
 
             string validationResponseContent = await response.Content.ReadAsStringAsync();
             ValidationResultModel validationResultModel = JsonConvert.DeserializeObject<ValidationResultModel>(validationResponseContent);
-            if (!validationResultModel.IsValid)
+            if (validationResultModel.IsValid)
             {
-                return View("ChangeSalaryForm", insuredPersonModel);
+                return true;
             }
 
-            response = await SendApiRequestAsync(
-                $"/contract/{insuredPersonModel.ContractId}/insured-person/{insuredPersonModel.InsuredPersonId}/salary",
-                HttpMethod.Post,
-                new
-                {
-                    effectiveAnnualSalary = insuredPersonModel.AnnualSalary,
-                    employmentRate = insuredPersonModel.EmploymentRate,
-                    dueDate = DateTime.Now,
-                });
-            if (response.IsSuccessStatusCode)
+            foreach (ValidationMemberModel member in validationResultModel.Members)
             {
-                return View();
+                ModelState.AddModelError(member.Member, string.Join(", ", member.Errors.Select(error => error.Code)));
             }
 
-            return StatusCode((int)response.StatusCode);
-        }
-
-        public Task<IActionResult> Documents(string refCorrelationId = "3921DDC2-3587-4B65-91F0-D30278C8FB5A")
-        {
-            return RequestApiJsonAsync<DocumentsModel>($"/document?refCorrelationId={refCorrelationId}");
-        }
-
-        public Task<IActionResult> DownloadDocument(string documentId)
-        {
-            return RequestApiAsync(
-                $"/document/{documentId}/content",
-                async response => {
-                    byte[] content = await response.Content.ReadAsByteArrayAsync();
-                    return File(content, response.Content.Headers.ContentType.ToString(), response.Content.Headers.ContentDisposition.FileName);
-                });
-        }
-
-        private Task<IActionResult> RequestApiJsonAsync<T>(string path)
-        {
-            return RequestApiAsync(
-                path,
-                async response => {
-                    string json = await response.Content.ReadAsStringAsync();
-                    T model = JsonConvert.DeserializeObject<T>(json);
-                    return View(model);
-                });
-        }
-
-        private async Task<IActionResult> RequestApiAsync(string path, Func<HttpResponseMessage, Task<IActionResult>> handler)
-        {
-            HttpResponseMessage response = await SendApiRequestAsync(path, HttpMethod.Get);
-            if (!response.IsSuccessStatusCode)
-            {
-                return StatusCode((int)response.StatusCode);
-            }
-
-            return await handler.Invoke(response);
+            return false;
         }
 
         private async Task<HttpResponseMessage> SendApiRequestAsync(
             string path, 
             HttpMethod method,
-            object data = null)
+            object data = null,
+            CancellationToken cancellationToken = default)
         {
             string accessToken = await HttpContext.GetTokenAsync("access_token");
             HttpClient httpClient = httpClientFactory.CreateClient();
@@ -143,7 +189,7 @@ namespace SwissLife.Slkv.Partner.ClientAppSample.Controllers
                 request.Content = new StringContent(JsonConvert.SerializeObject(data), System.Text.Encoding.UTF8, "application/json");
             }
 
-            return await httpClient.SendAsync(request);
+            return await httpClient.SendAsync(request, cancellationToken);
         }
     }
 }

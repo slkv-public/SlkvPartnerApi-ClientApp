@@ -90,7 +90,9 @@ namespace SwissLife.Slkv.Partner.ClientAppSample
             app.UseEndpoints(endpoints => endpoints.MapDefaultControllerRoute());
         }
 
-        private void CheckSameSite(HttpContext context, CookieOptions cookieOptions)
+        private void CheckSameSite(
+            HttpContext context, 
+            CookieOptions cookieOptions)
         {
             // probably you need some same site checks
         }
