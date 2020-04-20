@@ -39,7 +39,7 @@ namespace SwissLife.Slkv.Partner.ClientAppSample.Controllers
                 cancellationToken: cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
-                return StatusCode((int)response.StatusCode);
+                return ViewError(response);
             }
 
             string json = await response.Content.ReadAsStringAsync();
@@ -57,7 +57,7 @@ namespace SwissLife.Slkv.Partner.ClientAppSample.Controllers
                 cancellationToken: cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
-                return StatusCode((int)response.StatusCode);
+                return ViewError(response);
             }
 
             string json = await response.Content.ReadAsStringAsync();
@@ -102,7 +102,7 @@ namespace SwissLife.Slkv.Partner.ClientAppSample.Controllers
                 return View();
             }
 
-            return StatusCode((int)response.StatusCode);
+            return ViewError(response);
         }
 
         public async Task<IActionResult> Documents(
@@ -115,7 +115,7 @@ namespace SwissLife.Slkv.Partner.ClientAppSample.Controllers
                 cancellationToken: cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
-                return StatusCode((int)response.StatusCode);
+                return ViewError(response);
             }
 
             string json = await response.Content.ReadAsStringAsync();
@@ -133,7 +133,7 @@ namespace SwissLife.Slkv.Partner.ClientAppSample.Controllers
                 cancellationToken: cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
-                return StatusCode((int)response.StatusCode);
+                return ViewError(response);
             }
 
             byte[] content = await response.Content.ReadAsByteArrayAsync();
@@ -190,6 +190,12 @@ namespace SwissLife.Slkv.Partner.ClientAppSample.Controllers
             }
 
             return await httpClient.SendAsync(request, cancellationToken);
+        }
+
+        private IActionResult ViewError(HttpResponseMessage response)
+        {
+            ViewBag.StatusCode = response.StatusCode;
+            return View("Error");
         }
     }
 }
