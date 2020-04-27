@@ -18,7 +18,6 @@ namespace SwissLife.Slkv.Partner.ClientAppSample.Controllers
     [Authorize]
     public class RequestController : Controller
     {
-        private const string SampleContractId = "B01482DD9BED4927BEB5BB54EFD6D6E2";
         private readonly IHttpClientFactory httpClientFactory;
         private readonly IConfiguration configuration;
 
@@ -48,9 +47,11 @@ namespace SwissLife.Slkv.Partner.ClientAppSample.Controllers
         }
 
         public async Task<IActionResult> InsuredPersons(
-            string contractId = SampleContractId,
+            string contractId,
             CancellationToken cancellationToken = default)
         {
+            contractId = contractId ?? configuration["SampleData:ContractId"];
+
             HttpResponseMessage response = await SendApiRequestAsync(
                 $"/contract/{contractId}/insured-person", 
                 HttpMethod.Get,
@@ -106,9 +107,11 @@ namespace SwissLife.Slkv.Partner.ClientAppSample.Controllers
         }
 
         public async Task<IActionResult> Documents(
-            string refCorrelationId = "3921DDC2-3587-4B65-91F0-D30278C8FB5A",
+            string refCorrelationId,
             CancellationToken cancellationToken = default)
         {
+            refCorrelationId = refCorrelationId ?? configuration["SampleData:RefCorrelationId"];
+
             HttpResponseMessage response = await SendApiRequestAsync(
                 $"/document?refCorrelationId={refCorrelationId}", 
                 HttpMethod.Get,
