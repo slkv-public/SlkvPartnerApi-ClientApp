@@ -50,7 +50,7 @@ namespace SwissLife.Slkv.Partner.ClientAppSample.Controllers
             string contractId,
             CancellationToken cancellationToken = default)
         {
-            contractId = contractId ?? configuration["SampleData:ContractId"];
+            contractId ??= configuration["SampleData:ContractId"];
 
             HttpResponseMessage response = await SendApiRequestAsync(
                 $"/contract/{contractId}/insured-person", 
@@ -110,7 +110,7 @@ namespace SwissLife.Slkv.Partner.ClientAppSample.Controllers
             string refCorrelationId,
             CancellationToken cancellationToken = default)
         {
-            refCorrelationId = refCorrelationId ?? configuration["SampleData:RefCorrelationId"];
+            refCorrelationId ??= configuration["SampleData:RefCorrelationId"];
 
             HttpResponseMessage response = await SendApiRequestAsync(
                 $"/document?refCorrelationId={refCorrelationId}", 
