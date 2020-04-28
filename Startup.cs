@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SwissLife.Slkv.Partner.ClientAppSample.Services;
 
 namespace SwissLife.Slkv.Partner.ClientAppSample
 {
@@ -23,7 +24,7 @@ namespace SwissLife.Slkv.Partner.ClientAppSample
             services.AddHttpClient();
             services.Configure<CookiePolicyOptions>(options =>
             {
-                options.CheckConsentNeeded = context => true;
+                options.CheckConsentNeeded = _ => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
@@ -67,6 +68,7 @@ namespace SwissLife.Slkv.Partner.ClientAppSample
                 });
 
             services.AddControllersWithViews();
+            services.AddTransient<ISlkvPartnerApiClient, SlkvPartnerApiClient>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -90,11 +92,47 @@ namespace SwissLife.Slkv.Partner.ClientAppSample
             app.UseEndpoints(endpoints => endpoints.MapDefaultControllerRoute());
         }
 
-        private void CheckSameSite(
-            HttpContext context, 
-            CookieOptions cookieOptions)
+        private static void CheckSameSite(
+            HttpContext httpContext,
+            CookieOptions options)
         {
-            // probably you need some same site checks
+            if (options.SameSite == SameSiteMode.None)
+            {
+                var userAgent = httpContext.Request.Headers["User-Agent"].ToString();
+                if (DisallowsSameSiteNone(userAgent))
+                {
+                    options.SameSite = SameSiteMode.Unspecified;
+                }
+            }
+        }
+
+        private static bool DisallowsSameSiteNone(string userAgent)
+        {
+            if (string.IsNullOrWhiteSpace(userAgent))
+            {
+                return false;
+            }
+
+            if (userAgent.Contains("CPU iPhone OS 12") ||
+                userAgent.Contains("iPad; CPU OS 12"))
+            {
+                return true;
+            }
+
+            if (userAgent.Contains("Macintosh; Intel Mac OS X 10_14") &&
+                userAgent.Contains("Version/") &&
+                userAgent.Contains("Safari"))
+            {
+                return true;
+            }
+
+            if (userAgent.Contains("Chrome/5") ||
+                userAgent.Contains("Chrome/6"))
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

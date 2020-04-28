@@ -9,7 +9,7 @@
     <div class="col-md-12">
         <h2>@ViewData["Title"].</h2>
 
-        <p>Welcome <strong>@User.Identity.Name</strong>. Here are the claims associated with your account:</p>
+        <p>Welcome <strong>@User.Claims.FirstOrDefault(claim => claim.Type == "name")?.Value</strong>. Here are the claims associated with your account:</p>
 
         <table class="table">
             <thead>
